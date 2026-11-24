@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eaf3e8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="饮食日记">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>我的饮食日记</title>
+<style>
+:root{--bg:#f5f8f2;--card:#fff;--green:#477b58;--green2:#e6f0e4;--ink:#26352a;--muted:#788579;--line:#e5ebe2;--danger:#b94b43;--shadow:0 5px 20px rgba(43,75,48,.06)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+header{padding:calc(18px + env(safe-area-inset-top)) 18px 14px;background:linear-gradient(135deg,#e6f0e3,#f4f7ed)}
+h1{font-size:23px;margin:0 0 5px;font-weight:750;letter-spacing:.3px}.sub{font-size:12px;color:#687b69}
+main{max-width:720px;margin:auto;padding:14px}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:#fffffff2;backdrop-filter:blur(15px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:5}
+.tabs button{border:0;background:none;color:var(--muted);font-size:11px;padding:5px;display:flex;flex-direction:column;gap:4px;align-items:center}.tabs button b{font-size:19px;font-weight:500}.tabs button.active{color:var(--green);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:15px;margin:0 0 12px;box-shadow:var(--shadow)}
+.row{display:flex;gap:9px;align-items:center}.between{justify-content:space-between}.muted{color:var(--muted);font-size:12px}.section{font-size:16px;font-weight:750;margin:3px 0 12px}
+input,textarea,select{width:100%;border:1px solid #dfe7dc;border-radius:11px;background:#fbfdf9;padding:11px 12px;font:inherit;color:var(--ink);outline:none}textarea{resize:vertical;min-height:72px}label{display:block;font-size:12px;color:#647365;margin:11px 0 6px}
+button{font:inherit;cursor:pointer}.primary{background:var(--green);color:white;border:0;border-radius:12px;padding:12px 16px;font-weight:650}.soft{background:var(--green2);color:var(--green);border:0;border-radius:11px;padding:10px 13px}.ghost{background:#f3f6f1;border:1px solid var(--line);color:#526454;border-radius:10px;padding:9px 12px}.danger{color:var(--danger);background:#fff3f1;border:0;border-radius:10px;padding:9px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}.chip{border:1px solid #dfe7dc;border-radius:20px;padding:7px 11px;font-size:12px;background:#fbfdf9;color:#566557}.chip.on{background:#e2efe1;border-color:#9dbb9d;color:#356644}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.hidden{display:none!important}.meal{border-left:4px solid #9bbd98}.entry{padding:11px 0;border-bottom:1px solid var(--line)}.entry:last-child{border:0}.entry-title{font-weight:700;font-size:14px}.entry-meta{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.6}.empty{text-align:center;color:var(--muted);padding:25px 8px;font-size:13px}
+.stat{background:#f1f6ef;border-radius:13px;padding:12px}.stat strong{font-size:21px;color:var(--green);display:block}.stat span{font-size:11px;color:var(--muted)}
+h2{font-size:17px;margin:4px 0 12px}.topdate{font-size:13px;color:#657866}
+small.note{color:var(--muted);font-size:11px;line-height:1.5;display:block;margin-top:8px}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+@media(min-width:650px){main{padding:20px}.grid2{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>🌿 我的饮食日记</h1><div class="sub">记录饮食，也关心身体与心情</div></header>
+<main>
+<section id="page-today">
+ <div class="row between" style="margin:3px 2px 12px"><div><div class="section" style="margin:0">今天的观察</div><div class="topdate" id="todayLabel"></div></div><button class="soft" onclick="showQuickAdd()">＋ 新增记录</button></div>
+ <div class="grid2" style="margin-bottom:12px"><div class="stat"><strong id="mealCount">0</strong><span>饮食记录</span></div><div class="stat"><strong id="wellCount">0</strong><span>身心记录</span></div></div>
+ <div class="card"><div class="section">今日时间轴</div><div id="todayTimeline" class="empty">今天还没有记录，点击「新增记录」开始吧。</div></div>
+ <div class="card"><div class="section">快速记录</div><div class="grid2"><button class="soft" onclick="openForm('food','早餐')">🍳 早餐</button><button class="soft" onclick="openForm('food','午餐')">🥗 午餐</button><button class="soft" onclick="openForm('food','晚餐')">🍲 晚餐</button><button class="soft" onclick="openForm('food','零食')">🍎 零食 / 加餐</button><button class="soft" onclick="openForm('mood')">💚 心理状态</button><button class="soft" onclick="openForm('body')">🌱 身体状态</button></div></div>
+</section>
+<section id="page-history" class="hidden">
+ <h2>历史日记</h2><div class="card"><label>选择日期</label><input type="date" id="historyDate"><div id="historyList"></div></div>
+</section>
+<section id="page-analysis" class="hidden">
+ <h2>趋势与观察</h2><div class="card"><label>分析范围</label><select id="analysisRange" onchange="renderAnalysis()"><option value="7">最近 7 天</option><option value="30">最近 30 天</option><option value="all">全部记录</option></select><div id="analysisContent"></div><small class="note">这里只展示记录频次和时间上的共现情况，不代表某种食物导致某种症状。</small></div>
+</section>
+<section id="page-settings" class="hidden">
+ <h2>数据管理</h2>
+ <div class="card"><div class="section">本机数据备份</div><p class="muted">记录保存在当前 iPhone 的 Safari 网站数据中。建议定期导出备份。</p><div class="row"><button class="primary" onclick="exportJSON()">导出完整备份</button><button class="soft" onclick="exportCSV()">导出 CSV</button></div><label>从 JSON 备份恢复</label><input type="file" id="importFile" accept="application/json" onchange="importJSON(event)"><small class="note">恢复会将备份中的记录合并到当前日记；相同记录 ID 不会重复导入。</small></div>
+ <div class="card"><div class="section">关于隐私与数据</div><p class="muted">此版本不设置账户，不主动向云端发送日记。数据仅保存在当前浏览器的本机数据库。清除 Safari 网站数据、卸载或更换设备可能造成数据丢失，请保留备份。</p></div>
+ <div class="card"><div class="section">安装到主屏幕</div><p class="muted">使用 Safari 打开部署后的 HTTPS 地址，点击分享按钮，再选择「添加到主屏幕」。</p></div>
+ <div class="card"><button class="danger" onclick="clearAll()">删除本机全部日记</button></div>
+</section>
+</main>
+<nav class="tabs">
+<button class="active" data-page="today" onclick="switchPage('today',this)"><b>⌂</b>今日</button>
+<button data-page="history" onclick="switchPage('history',this)"><b>▦</b>历史</button>
+<button data-page="analysis" onclick="switchPage('analysis',this)"><b>⌁</b>分析</button>
+<button data-page="settings" onclick="switchPage('settings',this)"><b>⚙</b>设置</button>
+</nav>
+<div id="modal" class="hidden" style="position:fixed;inset:0;background:#15251acc;z-index:10;overflow:auto;padding:18px 12px">
+ <div class="card" style="max-width:620px;margin:20px auto;padding:18px">
+  <div class="row between"><h2 id="formTitle">新增记录</h2><button class="ghost" onclick="closeForm()">关闭</button></div>
+  <div id="foodFields">
+   <label>餐次</label><select id="mealType"><option>早餐</option><option>午餐</option><option>晚餐</option><option>零食</option></select>
+   <label>记录时间</label><input id="foodTime" type="datetime-local">
+   <label>吃了什么？（自由编辑）</label><textarea id="foodText" placeholder="例如：鸡蛋、全麦面包、牛奶……"></textarea>
+   <label>这一餐的主要味道（可多选）</label><div id="flavourChips" class="chips"></div>
+   <label>用餐状态</label><div id="mealStateChips" class="chips"></div>
+   <label>食物温度</label><div id="tempChips" class="chips"></div>
+  </div>
+  <div id="moodFields" class="hidden">
+   <label>记录时间</label><input id="moodTime" type="datetime-local">
+   <label>心理状态（可多选）</label><div id="moodChips" class="chips"></div>
+   <label>补充说明</label><textarea id="moodNote" placeholder="当时发生了什么？有什么感受？"></textarea>
+  </div>
+  <div id="bodyFields" class="hidden">
+   <label>记录时间</label><input id="bodyTime" type="datetime-local">
+   <label>身体状态 / 感受（可多选）</label><div id="bodyChips" class="chips"></div>
+   <label>补充说明</label><textarea id="bodyNote" placeholder="例如：午餐后约一小时开始腹胀……"></textarea>
+  </div>
+  <label>其他备注（选填）</label><textarea id="extraNote" placeholder="可以记录份量、品牌、环境等细节"></textarea>
+  <div class="row" style="margin-top:15px"><button class="primary" style="flex:1" onclick="saveEntry()">保存记录</button><button id="deleteBtn" class="danger hidden" onclick="deleteEntry()">删除</button></div>
+  <small class="note">保存后自动写入本机数据库。</small>
+ </div>
+</div>
+<script>
+const DB_NAME='FoodWellnessDiary', STORE='entries', VERSION=1;
+let db, currentKind='food', editingId=null, selected={flavours:[],mealState:[],temp:[],moods:[],body:[]};
+const opts={
+ flavours:['甜','酸','苦','辣','咸','鲜','清淡','油腻'],
+ mealState:['正常','很饿','没胃口','匆忙','吃撑了'],
+ temp:['热','温热','常温','冷'],
+ moods:['开心','平静','焦虑','低落','易怒','疲惫','压力大','烦躁','有动力','情绪不稳定'],
+ body:['精神正常','疲劳乏力','腹胀','胃部不适','反酸','排便异常','头痛','皮肤变化','口渴','睡眠不好','其他不适']
+};
+const $=id=>document.getElementById(id);
+function openDB(){return new Promise((resolve,reject)=>{let r=indexedDB.open(DB_NAME,VERSION);r.onupgradeneeded=()=>{let d=r.result;if(!d.objectStoreNames.contains(STORE)){let s=d.createObjectStore(STORE,{keyPath:'id'});s.createIndex('date','date');s.createIndex('timestamp','timestamp')}};r.onsuccess=()=>{db=r.result;resolve(db)};r.onerror=()=>reject(r.error)})}
+function all(){return new Promise((res,rej)=>{let r=db.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>res(r.result.sort((a,b)=>a.timestamp-b.timestamp));r.onerror=()=>rej(r.error)})}
+function put(x){return new Promise((res,rej)=>{let r=db.transaction(STORE,'readwrite').objectStore(STORE).put(x);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function del(id){return new Promise((res,rej)=>{let r=db.transaction(STORE,'readwrite').objectStore(STORE).delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error)})}
+function localDate(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function localDT(d=new Date()){return localDate(d)+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function fmt(ts){return new Date(ts).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false})}
+function chips(id,key){$(id).innerHTML=opts[key].map(v=>`<button type="button" class="chip ${selected[key].includes(v)?'on':''}" data-val="${v}" onclick="toggleChip('${key}',this)">${v}</button>`).join('')}
+function toggleChip(k,b){let v=b.dataset.val;selected[k].includes(v)?selected[k]=selected[k].filter(x=>x!==v):selected[k].push(v);b.classList.toggle('on')}
+function resetSelected(){selected={flavours:[],mealState:[],temp:[],moods:[],body:[]}}
+function openForm(kind,meal='早餐',entry=null){
+ currentKind=kind;editingId=entry?.id||null;resetSelected();
+ $('foodFields').classList.toggle('hidden',kind!=='food');$('moodFields').classList.toggle('hidden',kind!=='mood');$('bodyFields').classList.toggle('hidden',kind!=='body');
+ $('formTitle').textContent=(entry?'编辑':'新增')+(kind==='food'?'饮食记录':kind==='mood'?'心理记录':'身体记录');
+ $('deleteBtn').classList.toggle('hidden',!entry);
+ ['foodText','moodNote','bodyNote','extraNote'].forEach(id=>$(id).value='');
+ if(kind==='food'){
+ $('mealType').value=entry?.meal||meal;$('foodTime').value=entry?localDT(new Date(entry.timestamp)):localDT();$('foodText').value=entry?.text||'';
+ selected.flavours=entry?.flavours||[];selected.mealState=entry?.mealState||[];selected.temp=entry?.temp||[];
+ chips('flavourChips','flavours');chips('mealStateChips','mealState');chips('tempChips','temp');
+ }else if(kind==='mood'){
+ $('moodTime').value=entry?localDT(new Date(entry.timestamp)):localDT();$('moodNote').value=entry?.text||'';selected.moods=entry?.moods||[];chips('moodChips','moods');
+ }else{
+ $('bodyTime').value=entry?localDT(new Date(entry.timestamp)):localDT();$('bodyNote').value=entry?.text||'';selected.body=entry?.body||[];chips('bodyChips','body');
+ }
+ $('extraNote').value=entry?.note||'';$('modal').classList.remove('hidden');
+}
+function closeForm(){$('modal').classList.add('hidden')}
+async function saveEntry(){
+ let ts=new Date(currentKind==='food'?$('foodTime').value:currentKind==='mood'?$('moodTime').value:$('bodyTime').value).getTime();
+ if(!Number.isFinite(ts)){alert('请填写有效时间');return}
+ let e={id:editingId||crypto.randomUUID(),kind:currentKind,timestamp:ts,date:localDate(new Date(ts)),note:$('extraNote').value,updatedAt:Date.now()};
+ if(currentKind==='food'){e.meal=$('mealType').value;e.text=$('foodText').value.trim();e.flavours=[...selected.flavours];e.mealState=[...selected.mealState];e.temp=[...selected.temp];if(!e.text){alert('请先填写食物内容');return}}
+ if(currentKind==='mood'){e.moods=[...selected.moods];e.text=$('moodNote').value.trim();if(!e.moods.length&&!e.text){alert('请选择心理状态或填写说明');return}}
+ if(currentKind==='body'){e.body=[...selected.body];e.text=$('bodyNote').value.trim();if(!e.body.length&&!e.text){alert('请选择身体状态或填写说明');return}}
+ await put(e);closeForm();await refresh();
+}
+async function deleteEntry(){if(editingId&&confirm('确定删除这条记录吗？')){await del(editingId);closeForm();await refresh()}}
+function showQuickAdd(){openForm('food','早餐')}
+function switchPage(p,b){document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));$('page-'+p).classList.remove('hidden');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(p==='history')renderHistory();if(p==='analysis')renderAnalysis()}
+function renderEntry(e){let label=e.kind==='food'?e.meal:e.kind==='mood'?'心理状态':'身体状态';let content=e.kind==='food'?e.text:e.kind==='mood'?[...(e.moods||[]),e.text].filter(Boolean).join('、'): [...(e.body||[]),e.text].filter(Boolean).join('、');let meta=e.kind==='food'?[(e.flavours||[]).join('、'),(e.mealState||[]).join('、'),(e.temp||[]).join('、')].filter(Boolean).join(' · '):'';return `<div class="entry"><div class="row between"><div class="entry-title">${fmt(e.timestamp)} · ${label}</div><button class="ghost" onclick="editById('${e.id}')">编辑</button></div><div>${esc(content||'（未填写文字）')}</div><div class="entry-meta">${esc(meta)} ${e.note?' · '+esc(e.note):''}</div></div>`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function editById(id){let e=(await all()).find(x=>x.id===id);if(e)openForm(e.kind,e.meal,e)}
+async function refresh(){
+ let a=await all(),today=localDate();$('todayLabel').textContent=new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+ let t=a.filter(x=>x.date===today);$('mealCount').textContent=t.filter(x=>x.kind==='food').length;$('wellCount').textContent=t.filter(x=>x.kind!=='food').length;
+ $('todayTimeline').innerHTML=t.length?t.map(renderEntry).join(''):'<div class="empty">今天还没有记录，点击「新增记录」开始吧。</div>';
+ if(!$('page-history').classList.contains('hidden'))renderHistory();
+}
+async function renderHistory(){let date=$('historyDate').value||localDate();$('historyDate').value=date;let a=(await all()).filter(x=>x.date===date);$('historyList').innerHTML=a.length?a.map(renderEntry).join(''):'<div class="empty">这一天还没有日记。</div>'}
+async function renderAnalysis(){
+ let a=await all(),range=$('analysisRange').value,cut=range==='all'?0:Date.now()-Number(range)*86400000;a=a.filter(x=>x.timestamp>=cut);
+ let foods=a.filter(x=>x.kind==='food'),moods=a.filter(x=>x.kind==='mood'),body=a.filter(x=>x.kind==='body');
+ let tally=arr=>{let m={};arr.flat().forEach(v=>m[v]=(m[v]||0)+1);return Object.entries(m).sort((x,y)=>y[1]-x[1])};
+ let fl=tally(foods.map(x=>x.flavours||[])),mo=tally(moods.map(x=>x.moods||[])),bo=tally(body.map(x=>x.body||[]));
+ const list=(title,items)=>`<div style="margin-top:15px"><b>${title}</b>${items.length?items.slice(0,8).map(([k,v])=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><span>${esc(k)}</span><span class="muted">${v} 次</span></div>`).join(''):'<p class="muted">暂无数据</p>'}</div>`;
+ $('analysisContent').innerHTML=`<div class="grid2"><div class="stat"><strong>${foods.length}</strong><span>饮食记录</span></div><div class="stat"><strong>${moods.length+body.length}</strong><span>身心记录</span></div></div>${list('常见味道',fl)}${list('常见心理状态',mo)}${list('常见身体感受',bo)}`;
+}
+async function exportJSON(){let data={app:'Food & Wellness Diary',version:1,exportedAt:new Date().toISOString(),entries:await all()};download('饮食日记备份-'+localDate()+'.json',JSON.stringify(data,null,2),'application/json')}
+async function exportCSV(){let a=await all(),head=['日期','时间','类型','餐次','食物/描述','味道','用餐状态','温度','心理状态','身体状态','备注'];let rows=a.map(e=>[e.date,fmt(e.timestamp),e.kind,e.meal||'',e.text||'',(e.flavours||[]).join('、'),(e.mealState||[]).join('、'),(e.temp||[]).join('、'),(e.moods||[]).join('、'),(e.body||[]).join('、'),e.note||'']);let csv='\ufeff'+[head,...rows].map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('饮食日记-'+localDate()+'.csv',csv,'text/csv;charset=utf-8')}
+function download(name,content,type){let blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+async function importJSON(ev){let f=ev.target.files[0];if(!f)return;try{let x=JSON.parse(await f.text()),entries=x.entries;if(!Array.isArray(entries))throw Error();let old=new Set((await all()).map(e=>e.id));let n=0;for(let e of entries)if(e.id&&!old.has(e.id)){await put(e);n++}alert('恢复完成，新增 '+n+' 条记录。');await refresh()}catch(e){alert('文件格式不正确，无法恢复。')}ev.target.value=''}
+async function clearAll(){if(!confirm('确定删除本机全部日记？此操作不可撤销，请先导出备份。'))return;let tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).clear();tx.oncomplete=refresh}
+$('historyDate').value=localDate();$('historyDate').addEventListener('change',renderHistory);
+(async()=>{await openDB();await refresh();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{})})();
+</script>
+</body></html>
